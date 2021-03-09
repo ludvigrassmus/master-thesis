@@ -14,24 +14,29 @@ class TestGenerator:
         
         
       
-    # Read corpus from file into data structure    
-    def read_corpus(self, corpus_file_path, no_articles=20000):
-        corpus = []
-        with open('corpus.csv') as csvfile:
-          reader = csv.reader(csvfile)
-          for line in reader:
-              corpus.append(line[0]) #.lower())
+    # # Read corpus from file into data structure    
+    # def read_corpus(self, corpus_file_path, no_articles=20000):
+    #     corpus = []
+    #     with open('corpus.csv') as csvfile:
+    #       reader = csv.reader(csvfile)
+    #       for line in reader:
+    #           corpus.append(line[0]) 
               
-        self.read_sentences(corpus, no_articles)
+    #     self.read_sentences(corpus, no_articles)
         
         
-    # Extract individual sentences from the corpus    
-    def read_sentences(self, corpus, no_articles):    
-        for article in corpus[:no_articles]:
-            for sentence in sent_tokenize(article):
-                if len(sentence) < 150:
-                    self.sent_corpus.append(sentence)
+    # # Extract individual sentences from the corpus    
+    # def read_sentences(self, corpus, no_articles):    
+    #     for article in corpus[:no_articles]:
+    #         for sentence in sent_tokenize(article):
+    #             if len(sentence) < 150:
+    #                 self.sent_corpus.append(sentence)
         
+    def read_corpus(self, corpus_file):
+        with open('sent_corpus.csv') as csvfile:
+            reader = csv.reader(csvfile)
+            for line in reader:
+                self.sent_corpus.append(line[0])
               
         
     # Get an approved sentence from corpus
