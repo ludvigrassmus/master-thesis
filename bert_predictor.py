@@ -16,14 +16,11 @@ class BertFilter:
     def decode(self, tokenizer, pred_idx):
         top_clean = 5
         ignore_tokens = string.punctuation + '[PAD]'
-        #pred = ''
         tokens = []
         for w in pred_idx:
             token = ''.join(tokenizer.decode(w).split())
             if token not in ignore_tokens:
-                #pred = token.replace('##', '')
                 tokens.append(token.replace('##', ''))
-        #return pred
         return tokens[:top_clean]
     
     def encode(self, tokenizer, text_sentence, add_special_tokens=True):

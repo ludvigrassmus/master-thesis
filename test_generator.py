@@ -13,27 +13,8 @@ class TestGenerator:
         self.sent_corpus = []
         
         
-      
-    # # Read corpus from file into data structure    
-    # def read_corpus(self, corpus_file_path, no_articles=20000):
-    #     corpus = []
-    #     with open('corpus.csv') as csvfile:
-    #       reader = csv.reader(csvfile)
-    #       for line in reader:
-    #           corpus.append(line[0]) 
-              
-    #     self.read_sentences(corpus, no_articles)
-        
-        
-    # # Extract individual sentences from the corpus    
-    # def read_sentences(self, corpus, no_articles):    
-    #     for article in corpus[:no_articles]:
-    #         for sentence in sent_tokenize(article):
-    #             if len(sentence) < 150:
-    #                 self.sent_corpus.append(sentence)
-        
     def read_corpus(self, corpus_file):
-        with open('sent_corpus.csv') as csvfile:
+        with open(corpus_file) as csvfile:
             reader = csv.reader(csvfile)
             for line in reader:
                 self.sent_corpus.append(line[0])
@@ -43,7 +24,7 @@ class TestGenerator:
     def get_sentence(self, keyword, available_labels):        
         for sentence in self.sent_corpus: 
             sent_words = word_tokenize(sentence)
-            if keyword in sent_words and len(sent_words) < 15:
+            if keyword in sent_words:
                 
                 
                 # if type(self.sent_filter) == BertFilter:  #THIS doesnt work for some reason
@@ -53,15 +34,15 @@ class TestGenerator:
                 if type(self.sent_filter) == MCBertFilter: 
                     if self.sent_filter.approve(sentence, keyword, available_labels):
                         return sentence
-                    else:
-                        print(sentence)
+                    # else:
+                    #     print(sentence)
   
-                # The above type check doesn't work for BertFilter for some reason 
+                # Type check doesn't work for BertFilter for some reason 
                 else:
                     if self.sent_filter.approve(sentence, keyword):
                         return sentence
-                    else: 
-                        print(sentence)
+                    # else: 
+                    #     print(sentence)
   
                     
         return None    
