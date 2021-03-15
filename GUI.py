@@ -14,12 +14,13 @@ class MyFrame(wx.Frame):
         my_btn = wx.Button(panel, label='Generate tests')
         my_btn.Bind(wx.EVT_BUTTON, self.on_press)
         my_sizer.Add(my_btn, 0, wx.ALL | wx.CENTER, 5)        
-        panel.SetSizer(my_sizer)        
-        self.sent_filter = BertFilter()
-        self.sent_generator = TestGenerator(self.sent_filter)
-        self.sent_generator.read_corpus('sent_corpus.csv')
-        self.instance_text = []
+        panel.SetSizer(my_sizer) 
         
+        # Load filter and sentence generator
+        sent_filter = BertFilter()
+        corpus_file = 'sent_corpus.csv'       
+        self.sent_generator = TestGenerator(sent_filter, corpus_file)
+        self.instance_text = []
         
         self.Show()
 
@@ -34,23 +35,25 @@ class MyFrame(wx.Frame):
             print("You didn't enter any words!")
         else:         
             keywords = value.strip().split(' ')
-            description = 'Cloze tests for: ' + value
-            
-            #st = wx.StaticText(self, label=description, pos=(5,65), style=wx.ALIGN_LEFT)
-            #self.instance_text.append(st)
             
             exercises = []
             for word in keywords:
                 exercise_rows = []
                 exercise = self.sent_generator.generate_test(word, keywords)
+                
+                # Split the exercise into a suitable amount of rows so the text fits 
+                # in the GUI window
                 words = exercise.split(' ')
                 row_str = words[0]
                 for word in words[1:]:
-                    if len(row_str + ' ' + word) < 60:  #Does adding the next word cause overflow? 
+                    # Check if adding the next word causes overflow
+                    if len(row_str + ' ' + word) < 60:  
                         row_str += ' ' + word
+                    # If it does, add the row to the row-list and start a new one    
                     else:
                         exercise_rows.append(row_str)
                         row_str = word
+                # Add the final row of the exercise     
                 exercise_rows.append(row_str)
                 
                 exercises.append(exercise_rows)

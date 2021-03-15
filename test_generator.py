@@ -1,18 +1,24 @@
 import string
-from nltk import word_tokenize, sent_tokenize
+from nltk import word_tokenize
 import csv
 from bert_predictor import BertFilter
 from MC_bert_predictor import MCBertFilter
+from nltk.tokenize.treebank import TreebankWordDetokenizer
+
 
 class TestGenerator: 
     
     
     # predictor - a model to judge suitability of the sentences
-    def __init__(self, sent_filter):
+    def __init__(self, sent_filter, corpus_file):
         self.sent_filter = sent_filter
-        self.sent_corpus = []
+        self.sent_corpus = []   
+
+        self.read_corpus(corpus_file)
+
+
         
-        
+    
     def read_corpus(self, corpus_file):
         with open(corpus_file) as csvfile:
             reader = csv.reader(csvfile)
@@ -22,15 +28,12 @@ class TestGenerator:
         
     # Get an approved sentence from corpus
     def get_sentence(self, keyword, available_labels):        
+        
         for sentence in self.sent_corpus: 
             sent_words = word_tokenize(sentence)
+            
             if keyword in sent_words:
                 
-                
-                # if type(self.sent_filter) == BertFilter:  #THIS doesnt work for some reason
-                #     if self.sent_filter.approve(sentence, keyword):
-                #         return sentence
-                    
                 if type(self.sent_filter) == MCBertFilter: 
                     if self.sent_filter.approve(sentence, keyword, available_labels):
                         return sentence
@@ -43,7 +46,7 @@ class TestGenerator:
                         return sentence
                     # else: 
                     #     print(sentence)
-  
+      
                     
         return None    
                 
@@ -58,22 +61,19 @@ class TestGenerator:
             return 'ERROR: NO APPROVED SENTENCE FOUND'
         
         # Replace the keyword with an empty space
-        tokenized_sentence = word_tokenize(sentence.lower())
-        has_punctuation = tokenized_sentence[-1] in string.punctuation
-    
-        if tokenized_sentence.index(keyword) == 0:  # The keyword is the first in the sentence        
-            return '___' + sentence[len(keyword):]        
-    
-        if has_punctuation and tokenized_sentence.index(keyword) == len(tokenized_sentence) - 2:
-            return sentence[:-len(keyword)-1] + '___' + tokenized_sentence[-1]
-        elif tokenized_sentence.index(keyword) == len(tokenized_sentence) - 1:
-            return sentence[:-len(keyword)] + '___'
-    
-        keyword_env = ' ' + keyword + ' '   # Adding whitespace to avoid replacing where the string may be part of a longer word
-       
-        return sentence.replace(keyword_env, ' ___ ')
-    
- 
+        tokenized_sentence = word_tokenize(sentence)
+        
+        detokenizer = TreebankWordDetokenizer()
+        
+        # Save separately to match both lower and upper case
+        lowered = [word.lower() for word in tokenized_sentence]
+
+        word_index = [i for i,word in enumerate(lowered) if word == keyword.lower()]
+        
+        for index in word_index:
+            tokenized_sentence[index] = '____'
+            
+        return detokenizer.detokenize(tokenized_sentence)
         
     
     
