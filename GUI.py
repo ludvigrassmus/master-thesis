@@ -18,7 +18,7 @@ class MyFrame(wx.Frame):
         
         # Load filter and sentence generator
         sent_filter = BertFilter()
-        corpus_file = 'sent_corpus.csv'       
+        corpus_file = 'complete_sent_corpus.csv'       
         self.sent_generator = TestGenerator(sent_filter, corpus_file)
         self.instance_text = []
         
@@ -32,7 +32,11 @@ class MyFrame(wx.Frame):
         self.instance_text = []            
             
         if not value:
-            print("You didn't enter any words!")
+            msg = "You didn't enter any words!"
+            st = wx.StaticText(self, label=msg, pos=(5, 65), style=wx.ALIGN_LEFT)
+            self.instance_text.append(st)
+            
+            
         else:         
             keywords = value.strip().split(' ')
             

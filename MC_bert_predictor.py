@@ -33,7 +33,7 @@ class MCBertFilter:
     
     
     def get_prediction(self, text_sentence, words):
-        top_k = 20
+        top_k = 10
         input_ids, mask_idx = self.encode(self.tokenizer, text_sentence)
         with torch.no_grad():
             predict = self.model(input_ids)[0]
