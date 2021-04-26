@@ -1,7 +1,8 @@
 import wx
-from bert_predictor import BertFilter
-from MC_bert_predictor import MCBertFilter
-from test_generator import TestGenerator
+from bert_filter import BertFilter
+from MC_bert_filter import MCBertFilter
+from test_generator_new import TestGenerator
+from cefr_word_scorer import CefrWordScorer
 
 
 class MyFrame(wx.Frame):    
@@ -18,8 +19,14 @@ class MyFrame(wx.Frame):
         
         # Load filter and sentence generator
         sent_filter = BertFilter()
-        corpus_file = 'complete_sent_corpus.csv'       
-        self.sent_generator = TestGenerator(sent_filter, corpus_file)
+        #corpus_file = 'A2+_sent_corpus.csv'   
+        corpus_dict = 'CEFR_sentences'
+        
+        self.sent_generator = TestGenerator(sent_filter) #corpus_file)
+        self.sent_generator.read_corpus(corpus_dict)
+        
+        self.word_scorer = CefrWordScorer('word_spacy_pos_to_gse_map.pickle')
+        
         self.instance_text = []
         
         self.Show()
@@ -40,10 +47,15 @@ class MyFrame(wx.Frame):
         else:         
             keywords = value.strip().split(' ')
             
-            exercises = []
+            #exercises = []
+            row_placement = 65
+            
             for word in keywords:
                 exercise_rows = []
-                exercise = self.sent_generator.generate_test(word, keywords)
+                
+                cefr = self.word_scorer.get_score(word)
+                
+                exercise = self.sent_generator.generate_test(word, keywords, cefr)
                 
                 # Split the exercise into a suitable amount of rows so the text fits 
                 # in the GUI window
@@ -60,12 +72,7 @@ class MyFrame(wx.Frame):
                 # Add the final row of the exercise     
                 exercise_rows.append(row_str)
                 
-                exercises.append(exercise_rows)
-            
-            
-            row_placement = 65  
-            for exercise in exercises:        
-                for row in exercise:
+                for row in exercise_rows:
                     st = wx.StaticText(self, label=row, pos=(5, row_placement), style=wx.ALIGN_LEFT)
                     row_placement += 15
                     self.instance_text.append(st)
