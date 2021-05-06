@@ -99,7 +99,7 @@ class CefrWordScorer:
             try:  # Check with lemma tag if not found
                 scores = self.gse_map_no_pos[lemma]
             except KeyError:
-                return None
+                return 'B2'
         score = num2cefr(gse_to_cefr9(get_gse_score(scores, scoring_type)))
         return score
     

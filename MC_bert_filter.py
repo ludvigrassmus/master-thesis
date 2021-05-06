@@ -37,7 +37,7 @@ class MCBertFilter:
         input_ids, mask_idx = self.encode(self.tokenizer, text_sentence)
         with torch.no_grad():
             predict = self.model(input_ids)[0]
-        bert = self.decode(self.tokenizer, predict[0, mask_idx, :].topk(top_k).indices.tolist(), words)
+        bert = self.decode(self.tokenizer, predict[0, mask_idx, :].topk(top_k), words)
     
         return bert
         
@@ -53,6 +53,7 @@ class MCBertFilter:
         masked_sentence = self.mask_sentence(sentence, keyword)
         prediction = self.get_prediction(masked_sentence, words)
         return keyword==prediction
+
     
     
     

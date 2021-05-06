@@ -56,12 +56,12 @@ class BertFilter:
     
     
     
-    def approve(self, sentence: str, keyword: str) -> bool: 
+    def approve(self, sentence: str, keyword: str, threshold: float) -> bool: 
         masked_sentence = self.mask_sentence(sentence, keyword)
         prediction = self.get_prediction(masked_sentence)
         words, values = list(zip(*prediction))
         #return keyword in prediction
-        return (keyword in words) and (values[words.index(keyword)] > 12.0)
+        return (keyword in words) and (values[words.index(keyword)] > threshold)
     
     
     

@@ -3,9 +3,10 @@ import csv
 import torch
 import math
 import os
+import random
 import numpy as np
-from bert_predictor import BertFilter
-from MC_bert_predictor import MCBertFilter
+from bert_filter import BertFilter
+#from MC_bert_filter import MCBertFilter
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 
 
@@ -16,7 +17,7 @@ A2, we first check for sentences in the A2 level corpus, then A1, and lastly
 A2+. 
 '''
 
-CEFR_LEVELS = {'A1': ('A1', 'A2', 'A2+'), 'A2': ('A2', 'A1', 'A2+'), 
+CEFR_LEVELS = {'A1': ('A1', 'A2', 'A2+'), 'A2': ('A2', 'A1', 'A2+', 'B1'), 
                'A2+': ('A2+', 'A2', 'B1', 'B1+'), 'B1': ('B1', 'A2+', 'B1+', 'B2'), 
                'B1+': ('B1+', 'B1', 'A2+', 'B2'), 'B2': ('B2', 'B1+', 'B1', 'B2+'), 
                'B2+': ('B2+', 'B2', 'B1+', 'B1'), 'C1': ('C1', 'B2+', 'B2', 'C2'), 
@@ -48,24 +49,33 @@ class TestGenerator:
               
         
     # Get an approved sentence from corpus
-    def get_sentence(self, keyword: str, available_labels: [str], cefr: str) -> [str]:  
+    def get_sent_candidates(self, keyword: str, available_labels: [str], cefr: str, threshold: float) -> [str]:  
         
         sent_candidates = []
         
-        for sentence in self.sent_corpora[cefr]: 
+        shuffled_sentences = self.sent_corpora[cefr]
+        random.shuffle(shuffled_sentences)
+        
+        for sentence in shuffled_sentences: 
             
             sent_words = word_tokenize(sentence)
             
             if keyword in sent_words:
                 
-                if type(self.sent_filter) == MCBertFilter: 
-                    if self.sent_filter.approve(sentence, keyword, available_labels):
-                        sent_candidates.append(sentence)
+                # if type(self.sent_filter) == MCBertFilter: 
+                #     if self.sent_filter.approve(sentence, keyword, available_labels):
+                #         sent_candidates.append(sentence)
   
-                # Type check doesn't work for BertFilter for some reason 
-                else:
-                    if self.sent_filter.approve(sentence, keyword):
-                        sent_candidates.append(sentence)
+                # # Type check doesn't work for BertFilter for some reason 
+                # else:
+                
+                if self.sent_filter.approve(sentence, keyword, threshold):
+                    sent_candidates.append(sentence)
+                
+                # Uncomment if it is desirable to know if any sentences containing 
+                # the keyword exist in the corpus
+                #else:
+                  #  print(sentence)
                         
             if len(sent_candidates) == 10:
                 break
@@ -86,14 +96,14 @@ class TestGenerator:
     
         
     # Generate a cloze test for given keyword
-    def generate_test(self, keyword: str, available_labels: [str], cefr: str) -> str:
+    def generate_test(self, keyword: str, available_labels: [str], cefr: str, threshold: float) -> str:
         
-
+        # Get the allowed CEFR levels to check through
         cefr_levels = CEFR_LEVELS[cefr]
 
         
         for cefr_level in cefr_levels:    
-            sent_candidates = self.get_sentence(keyword, available_labels, cefr_level)
+            sent_candidates = self.get_sent_candidates(keyword, available_labels, cefr_level, threshold)
             if sent_candidates:
                 break
 
@@ -101,7 +111,7 @@ class TestGenerator:
         if not sent_candidates:
             return 'ERROR: NO SENTENCE FOUND'
         
-        # Find best candidate
+        # Find the best candidate
         sent_scores = [self.get_score(sent) for sent in sent_candidates]
         sentence = sent_candidates[np.argmax(sent_scores)]
 
@@ -111,7 +121,7 @@ class TestGenerator:
         
         detokenizer = TreebankWordDetokenizer()
         
-        # Save separately to match both lower and upper case and return correctly
+        # Save separately to match both lower and upper case and return sentence correctly
         lowered = [word.lower() for word in tokenized_sentence]
 
         word_index = [i for i,word in enumerate(lowered) if word == keyword.lower()]
