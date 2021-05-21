@@ -1,2 +1,2 @@
 To run the client and server, a few packages are needed that aren't included in most Python distributions, and these need to be installed before running.
-These are nltk (for tokenizing, lemmatizing etc.), transformers (for BERT), grpc (for client-server communication) and torch. 
+These are nltk==3.6.2 (for tokenizing, lemmatizing etc.), transformers==4.6.1 (for BERT), grpcio==1.38.0 (for client-server communication) and torch==1.8.1. 
