@@ -54,7 +54,7 @@ class TestGeneratorServicer(test_generator_pb2_grpc.TestGeneratorServicer):
     def GetSentence(self, request, context):
         word = request.text
         cefr = self.word_scorer.get_score(word)
-        cloze_test = self.generate_test(word, cefr, 12.0)
+        cloze_test = self.generate_test(word, cefr, 10.0)
 
         cloze_message = test_generator_pb2.Sentence(text=cloze_test)
 
